@@ -44,7 +44,7 @@ class TypedLocalizer {
 
 const main = async () => {
   const l = new TypedLocalizer();
-  await l.loadFile('en-US', path.join(process.cwd(), '..', 'lang.ftl'));
+  await l.loadFile('en-US', path.join(process.cwd(), 'lang.ftl'));
 
   const msg = l.get('en-US', 'shared-photos', {
     photoCount: 5,
