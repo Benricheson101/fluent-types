@@ -1,8 +1,10 @@
-use clap::{Command, Arg};
+use clap::{Arg, Command};
 
 pub fn build_cli() -> Command<'static> {
     Command::new("Fluent Types")
-        .about("Generate TypeScript type declarations for Fluent language files")
+        .about(
+            "Generate TypeScript type declarations for Fluent language files",
+        )
         .arg(
             Arg::new("output")
                 .help("the output file")

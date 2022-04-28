@@ -1,5 +1,3 @@
-use std::env;
-
 use fluent_syntax::ast::{
     CallArguments,
     Entry,
@@ -11,8 +9,6 @@ use fluent_syntax::ast::{
     Variant,
     VariantKey,
 };
-
-const DBG_SPACES: usize = 2;
 
 #[derive(Debug)]
 pub struct ParsedMessages {
@@ -96,26 +92,6 @@ impl ParsedMessage {
     }
 }
 
-macro_rules! print_tree_node {
-    ($name:expr, $width:expr) => {
-        {
-            if (env::var("APP_ENV").unwrap_or("dev".into()) == "dev"){
-                println!("{:width$}{}", "", $name, width=$width*DBG_SPACES);
-            }
-        }
-    };
-
-    ($name:expr, $width:expr, $($arg:expr),*$(,)?) => {
-        {
-            if (env::var("APP_ENV").unwrap_or("dev".into()) == "dev"){
-                print!("{:width$}{}", "", $name, width=$width*DBG_SPACES);
-                $(print!(" {:?}", $arg);)*
-                print!("\n");
-            }
-        }
-    };
-}
-
 pub fn parse_resource(res: Resource<String>) -> ParsedMessages {
     walk_resource(res, 0)
 }
@@ -125,8 +101,6 @@ fn walk_resource(resource: Resource<String>, depth: usize) -> ParsedMessages {
     for node in &resource.body {
         match node {
             Entry::Message(msg) => {
-                print_tree_node!("Message", depth, msg.id.name);
-
                 if let Some(pat) = &msg.value {
                     let p = walk_pattern(pat, depth + 1);
 
@@ -138,18 +112,6 @@ fn walk_resource(resource: Resource<String>, depth: usize) -> ParsedMessages {
 
                     msgs.push(m);
                 }
-            },
-
-            Entry::Comment(comment) => {
-                print_tree_node!("Comment", depth, comment.content);
-            },
-
-            Entry::Junk { content } => {
-                print_tree_node!("Junk", depth, content);
-            },
-
-            Entry::Term(term) => {
-                print_tree_node!("Term", depth, term.id.name);
             },
 
             _ => {},
@@ -170,14 +132,12 @@ fn walk_pattern(
 
     for elem in &pattern.elements {
         match elem {
-            PatternElement::TextElement { value: text } => {
-                print_tree_node!("TextElement", depth, text);
-            },
-
             PatternElement::Placeable { expression: expr } => {
                 let mut e = walk_placeable_expression(expr, depth + 1);
                 elems.append(&mut e);
             },
+
+            _ => {},
         }
     }
 
@@ -190,14 +150,12 @@ fn walk_placeable_expression(
 ) -> Vec<ParsedInlineExpr> {
     let mut exprs = vec![];
 
-    print_tree_node!("Placeable", depth);
     let depth = depth + 1;
     match expr {
         Expression::Select {
             selector: sel,
             variants: vars,
         } => {
-            print_tree_node!("Selector", depth);
             let variants = walk_variant(vars, depth + 1);
             let mut e = walk_inline_expr(sel, variants, depth + 1);
 
@@ -205,7 +163,6 @@ fn walk_placeable_expression(
         },
 
         Expression::Inline(inl) => {
-            print_tree_node!("InlineExpression", depth);
             let mut e = walk_inline_expr(inl, None, depth + 1);
             exprs.append(&mut e);
         },
@@ -229,8 +186,6 @@ fn walk_inline_expr(
 
     match expr {
         InlineExpression::VariableReference { id } => {
-            print_tree_node!("VariableReference", depth, id.name);
-
             exprs.push(ParsedInlineExpr {
                 name: id.name.clone(),
                 variants,
@@ -238,27 +193,18 @@ fn walk_inline_expr(
         },
 
         InlineExpression::Placeable { expression } => {
+            // TODO: add to exprs
             walk_placeable_expression(expression, depth + 1);
         },
 
         InlineExpression::FunctionReference {
-            id,
+            id: _,
             arguments: args,
         } => {
-            print_tree_node!("FunctionReference", depth, id.name);
             let mut args = walk_arguments(args, variants, depth + 1);
-
             exprs.append(&mut args);
         },
-
-        InlineExpression::StringLiteral { value }
-        | InlineExpression::NumberLiteral { value } => {
-            print_tree_node!("Literal", depth, value);
-        },
-
-        _ => {
-            print_tree_node!("OtherInlineType", depth);
-        },
+        _ => {},
     };
 
     exprs
@@ -273,7 +219,6 @@ fn walk_variant(
         match &var.key {
             VariantKey::Identifier { name: id }
             | VariantKey::NumberLiteral { value: id } => {
-                print_tree_node!("Variant", depth, id,);
                 variants.push(id.to_owned())
             },
         }
@@ -308,12 +253,9 @@ fn walk_arguments(
     variants: Option<Vec<String>>,
     depth: usize,
 ) -> Vec<ParsedInlineExpr> {
-    print_tree_node!("CallArguments", depth);
-
     let mut exprs = vec![];
 
     for positional_arg in &args.positional {
-        print_tree_node!("PositionalArg", depth + 1);
         // TODO: can i do this without cloning?
         let mut e =
             walk_inline_expr(positional_arg, variants.clone(), depth + 2);
@@ -321,7 +263,6 @@ fn walk_arguments(
     }
 
     for named_arg in &args.named {
-        print_tree_node!("NamedArg", depth + 1, named_arg.name.name);
         let mut e =
             walk_inline_expr(&named_arg.value, variants.clone(), depth + 2);
         exprs.append(&mut e);
