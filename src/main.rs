@@ -29,11 +29,14 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let ts = msgs.to_typescript();
 
     if let Some(out_file) = matches.value_of("output") {
-        if let Err(err) = fs::write(out_file, ts) {
-            eprintln!("failed to write to output file: {}", err);
+        if out_file == "-" {
+            println!("{}", ts);
+        } else {
+            if let Err(err) = fs::write(out_file, ts) {
+                eprintln!("failed to write to output file: {}", err);
+                process::exit(1);
+            }
         }
-    } else {
-        println!("{}", ts);
     }
 
     Ok(())

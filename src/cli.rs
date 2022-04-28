@@ -10,7 +10,7 @@ pub fn build_cli() -> Command<'static> {
                 .help("the output file")
                 .short('o')
                 .takes_value(true)
-                .required(false),
+                .default_value("-"),
         )
         .arg(
             Arg::new("files")

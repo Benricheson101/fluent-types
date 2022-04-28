@@ -67,15 +67,17 @@ impl ParsedMessage {
                 .placeholders
                 .iter()
                 .map(|p| {
+                    let default_types = "string | number | Date";
                     let typ = if let Some(variants) = &p.variants {
                         variants
                             .iter()
                             .map(|v| format!("'{}'", v))
                             .collect::<Vec<_>>()
                             .join(" | ")
-                            + " | string"
+                            + " | "
+                            + default_types
                     } else {
-                        "string".into()
+                        default_types.into()
                     };
 
                     format!("    {}: {};", p.name, typ)
