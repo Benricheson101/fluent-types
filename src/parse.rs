@@ -156,6 +156,9 @@ fn walk_resource(resource: Resource<String>, depth: usize) -> ParsedMessages {
         }
     }
 
+    msgs.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    msgs.dedup_by(|a, b| a.name == b.name);
+
     ParsedMessages { msgs }
 }
 
