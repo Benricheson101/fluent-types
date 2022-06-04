@@ -10,7 +10,7 @@ use fluent_syntax::ast::{
     VariantKey,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParsedMessages {
     pub msgs: Vec<ParsedMessage>,
 }
@@ -48,7 +48,7 @@ impl ParsedMessages {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParsedMessage {
     pub name: String,
     pub comments: Option<Vec<String>>,
@@ -63,8 +63,11 @@ impl ParsedMessage {
         parts.push(header);
 
         if self.placeholders.len() > 0 {
-            let placeholders = self
-                .placeholders
+            let mut placeholders = self.placeholders.clone();
+            placeholders.sort_by_key(|k| k.name.to_lowercase());
+            placeholders.dedup_by(|a, b| a.name == b.name);
+
+            let placeholders = placeholders
                 .iter()
                 .map(|p| {
                     let default_types = "string | number | Date";
@@ -173,7 +176,7 @@ fn walk_placeable_expression(
     exprs
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ParsedInlineExpr {
     pub name: String,
     pub variants: Option<Vec<String>>,

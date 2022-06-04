@@ -27,3 +27,7 @@ your-rank = { NUMBER($pos, type: "ordinal") ->
     [few] You finished {$pos}rd
    *[other] You finished {$pos}th
 }
+
+some-text = Hi, {$name}
+
+multiple-occur-same-placeholder = hi {$name} hello {$name} greetings {$name}
