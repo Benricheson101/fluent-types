@@ -1,8 +1,10 @@
 def _fluent_types_generate_impl(ctx):
+  files = [f.path for f in ctx.files.srcs]
+
   ctx.actions.run(
-    inputs = ctx.files.src,
+    inputs = ctx.files.srcs,
     outputs = [ctx.outputs.out],
-    arguments = [ctx.files.src[0].path, "-o", ctx.outputs.out.path],
+    arguments = files + ["-o", ctx.outputs.out.path],
     executable = ctx.executable.executable,
   )
 
@@ -11,8 +13,8 @@ def _fluent_types_generate_impl(ctx):
 fluent_types_generate = rule(
   implementation = _fluent_types_generate_impl,
   attrs = {
-    "src": attr.label(
-      allow_single_file = [".ftl"],
+    "srcs": attr.label_list(
+      allow_files = [".ftl"],
       mandatory = True,
     ),
 
