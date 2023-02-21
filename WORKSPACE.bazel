@@ -1,4 +1,4 @@
-load("//:deps.bzl", "rules_fluent_types_dependencies")
+load("//:repositories.bzl", "rules_fluent_types_dependencies")
 rules_fluent_types_dependencies()
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
