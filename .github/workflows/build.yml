@@ -1,0 +1,34 @@
+name: 'Create Binaries'
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: 'ubuntu-latest'
+            name: 'fluent-types.linux'
+            artifact_name: 'fluent-types'
+          - os: 'windows-latest'
+            name: 'fluent-types.windows'
+            artifact_name: 'fluent-types.exe'
+          - os: 'macos-latest'
+            name: 'fluent-types.darwin'
+            artifact_name: 'fluent-types'
+
+    runs-on: '${{matrix.os}}'
+
+    steps:
+      - uses: 'actions/checkout@v3'
+
+      - name: 'Build'
+        run: 'cargo build --release'
+
+      - uses: 'actions/upload-artifact@v3'
+        name: 'Upload Artifact'
+        with:
+          name: '${{matrix.name}}'
+          path: 'target/release/${{matrix.artifact_name}}'
