@@ -5,5 +5,11 @@ rust_binary(
     name = "fluent-types",
     srcs = glob(["src/*.rs"]),
     deps = all_crate_deps(),
+    data = ["//:utilityTypes.ts"],
     visibility = ["//visibility:public"],
+)
+
+toolchain_type(
+  name = "toolchain_type",
+  visibility = ["//visibility:public"],
 )

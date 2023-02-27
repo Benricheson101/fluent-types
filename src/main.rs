@@ -1,5 +1,6 @@
 mod cli;
-mod parse;
+mod codegen;
+pub mod parse;
 
 use std::{error, fs, process};
 
@@ -26,7 +27,8 @@ fn main() -> Result<(), Box<dyn error::Error>> {
     let parsed =
         parser::parse(source).expect("failed to parse Fluent resources");
     let msgs = parse::parse_resource(parsed);
-    let ts = msgs.to_typescript();
+
+    let ts = codegen::generate_ts(&msgs);
 
     if let Some(out_file) = matches.value_of("output") {
         if out_file == "-" {

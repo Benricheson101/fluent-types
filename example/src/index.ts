@@ -2,7 +2,7 @@ import {FluentBundle, FluentResource} from '@fluent/bundle';
 import {readFile} from 'fs/promises';
 import path from 'path';
 
-import {Messages} from './messages';
+import {MessageNames, Placeholders} from './messages';
 
 type Locale = 'en-US';
 
@@ -23,10 +23,10 @@ class TypedLocalizer {
     this.#bundles.set(locale, bundle);
   }
 
-  get<T extends keyof Messages>(
+  get<T extends MessageNames>(
     locale: Locale,
     msg: T,
-    args?: Messages[T]
+    args?: Placeholders<T>
   ): string {
     const bundle = this.#bundles.get(locale);
     if (!bundle) {

@@ -15,86 +15,25 @@ pub struct ParsedMessages {
     pub msgs: Vec<ParsedMessage>,
 }
 
-impl ParsedMessages {
-    pub fn to_typescript(&self) -> String {
-        let mut parts = vec![];
-
-        let header = "export type Messages = {";
-        let msgs_as_ts = self
-            .msgs
-            .iter()
-            .map(|m| {
-                let ts = m.to_typescript();
-                if let Some(comments) = &m.comments {
-                    let comments = comments
-                        .iter()
-                        .map(|c| format!("   * {}", c))
-                        .collect::<Vec<_>>()
-                        .join("\n");
-
-                    format!("  /**\n{}\n   */\n{}", comments, ts)
-                } else {
-                    ts
-                }
-            })
-            .collect::<Vec<_>>()
-            .join("\n");
-
-        parts.push(header.into());
-        parts.push(msgs_as_ts);
-        parts.push("};".into());
-
-        parts.join("\n")
-    }
+#[derive(Debug, Clone)]
+pub struct ParsedAttribute {
+    pub name: String,
+    pub placeholders: Option<Vec<ParsedInlineExpr>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct ParsedMessage {
     pub name: String,
     pub comments: Option<Vec<String>>,
-    pub placeholders: Vec<ParsedInlineExpr>,
+    pub placeholders: Option<Vec<ParsedInlineExpr>>,
+    pub attrs: Option<Vec<ParsedAttribute>>,
+    pub has_value: bool,
 }
 
-impl ParsedMessage {
-    pub fn to_typescript(&self) -> String {
-        let mut parts = vec![];
-
-        let header = format!("  '{}': {{", self.name);
-        parts.push(header);
-
-        if self.placeholders.len() > 0 {
-            let mut placeholders = self.placeholders.clone();
-            placeholders.sort_by_key(|k| k.name.to_lowercase());
-            placeholders.dedup_by(|a, b| a.name == b.name);
-
-            let placeholders = placeholders
-                .iter()
-                .map(|p| {
-                    let default_types = "string | number | Date";
-                    let typ = if let Some(variants) = &p.variants {
-                        variants
-                            .iter()
-                            .map(|v| format!("'{}'", v))
-                            .collect::<Vec<_>>()
-                            .join(" | ")
-                            + " | "
-                            + default_types
-                    } else {
-                        default_types.into()
-                    };
-
-                    format!("    {}: {};", p.name, typ)
-                })
-                .collect::<Vec<_>>()
-                .join("\n");
-
-            parts.push(placeholders);
-        };
-
-        parts.push("  };".into());
-
-        parts.join("\n")
-    }
+#[derive(Debug, Clone)]
+pub struct ParsedInlineExpr {
+    pub name: String,
+    pub variants: Option<Vec<String>>,
 }
 
 pub fn parse_resource(res: Resource<String>) -> ParsedMessages {
@@ -106,17 +45,44 @@ fn walk_resource(resource: Resource<String>, depth: usize) -> ParsedMessages {
     for node in &resource.body {
         match node {
             Entry::Message(msg) => {
+                let mut m = ParsedMessage {
+                    name: msg.id.name.clone(),
+                    has_value: false,
+                    placeholders: None,
+                    attrs: None,
+                    comments: None,
+                };
+
                 if let Some(pat) = &msg.value {
                     let p = walk_pattern(pat, depth + 1);
 
-                    let m = ParsedMessage {
-                        name: msg.id.name.clone(),
-                        comments: msg.comment.clone().map(|c| c.content),
-                        placeholders: p,
-                    };
-
-                    msgs.push(m);
+                    m.comments = msg.comment.clone().map(|c| c.content);
+                    m.placeholders = Some(p);
+                    m.has_value = true;
                 }
+
+                let parsed_attrs = msg
+                    .attributes
+                    .iter()
+                    .map(|a| {
+                        let p = walk_pattern(&a.value, depth + 1);
+
+                        ParsedAttribute {
+                            name: a.id.name.clone(),
+                            placeholders: if p.is_empty() {
+                                None
+                            } else {
+                                Some(p)
+                            },
+                        }
+                    })
+                    .collect::<Vec<_>>();
+
+                if !parsed_attrs.is_empty() {
+                    m.attrs = Some(parsed_attrs);
+                }
+
+                msgs.push(m);
             },
 
             _ => {},
@@ -174,12 +140,6 @@ fn walk_placeable_expression(
     };
 
     exprs
-}
-
-#[derive(Debug, Clone)]
-pub struct ParsedInlineExpr {
-    pub name: String,
-    pub variants: Option<Vec<String>>,
 }
 
 fn walk_inline_expr(

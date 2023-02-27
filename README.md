@@ -6,9 +6,9 @@ Generate TypeScript type declarations for [Fluent](https://projectfluent.org) la
 `fluent-types ./lang/en.ftl -o src/output.d.ts`
 
 ```ts
-import {Messages} from './output';
+import {MessageNames, Placeholders} from './output';
 
-const get<T extends Messages>(msg: T, args: Messages[T]): string {
+const get<Name extends MessageNames>(msg: Name, args: Placeholders<Name>): string {
   const pattern = bundle.getMessage(msg);
   return bundle.formatPattern(pattern.value, args);
 };
