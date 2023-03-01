@@ -31,3 +31,21 @@ your-rank = { NUMBER($pos, type: "ordinal") ->
 some-text = Hi, {$name}
 
 multiple-occur-same-placeholder = hi {$name} hello {$name} greetings {$name}
+
+hi =
+    .hello = "hi {$name}"
+    .hello1 = "hi {$name}"
+    .hello2 = "hi {$name}"
+    .hello3 = "hi {$name}"
+    .hello4 = "hi {$name}"
+    .hello5 = "hi {$name}"
+    .hello6 = "hi {$name}"
+    .hello7 = "hi {$name}"
+    .hello8 = "hi {$name}"
+    .hello9 = "hi {$name}"
+    .hello10 = "hi {$name}"
+    .hello11 = "hi {$name}"
+    .hello12 = "hi {$name}"
+    .hello13 = "hi {$name}"
+    .hello14 = "hi {$name}"
+    .hello15 = "hi {$name}"

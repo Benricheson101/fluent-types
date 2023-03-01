@@ -3,6 +3,7 @@ use std::{collections::HashMap, sync::Arc};
 use swc::{atoms::JsWord, config::SourceMapsConfig, Compiler};
 use swc_common::{SourceMap, DUMMY_SP, GLOBALS};
 use swc_ecma_ast::{
+    Bool,
     Decl,
     EsVersion,
     ExportDecl,
@@ -26,7 +27,7 @@ use swc_ecma_ast::{
     TsTypeLit,
     TsTypeRef,
     TsUnionOrIntersectionType,
-    TsUnionType, Bool,
+    TsUnionType,
 };
 
 use crate::parse::{

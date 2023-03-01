@@ -54,31 +54,52 @@ fn walk_resource(resource: Resource<String>, depth: usize) -> ParsedMessages {
                 };
 
                 if let Some(pat) = &msg.value {
-                    let p = walk_pattern(pat, depth + 1);
+                    let mut p = walk_pattern(pat, depth + 1);
 
                     m.comments = msg.comment.clone().map(|c| c.content);
-                    m.placeholders = Some(p);
                     m.has_value = true;
+                    m.placeholders = if p.is_empty() {
+                        None
+                    } else {
+                        p.sort_by(|a, b| {
+                            a.name.to_lowercase().cmp(&b.name.to_lowercase())
+                        });
+                        p.dedup_by(|a, b| a.name == b.name);
+
+                        Some(p)
+                    };
                 }
 
-                let parsed_attrs = msg
+                let mut parsed_attrs: Vec<ParsedAttribute> = msg
                     .attributes
                     .iter()
                     .map(|a| {
-                        let p = walk_pattern(&a.value, depth + 1);
+                        let mut p = walk_pattern(&a.value, depth + 1);
 
                         ParsedAttribute {
                             name: a.id.name.clone(),
                             placeholders: if p.is_empty() {
                                 None
                             } else {
+                                p.sort_by(|a, b| {
+                                    a.name
+                                        .to_lowercase()
+                                        .cmp(&b.name.to_lowercase())
+                                });
+                                p.dedup_by(|a, b| a.name == b.name);
+
                                 Some(p)
                             },
                         }
                     })
-                    .collect::<Vec<_>>();
+                    .collect();
 
                 if !parsed_attrs.is_empty() {
+                    parsed_attrs.sort_by(|a, b| {
+                        a.name.to_lowercase().cmp(&b.name.to_lowercase())
+                    });
+                    parsed_attrs.dedup_by(|a, b| a.name == b.name);
+
                     m.attrs = Some(parsed_attrs);
                 }
 

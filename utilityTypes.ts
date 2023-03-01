@@ -11,20 +11,20 @@ export type AttributeMap = {
 
 export type PlaceholderMap = {
   readonly placeholders: {
-    readonly [key: string]: string;
+    readonly [key: string]: FluentPlaceholder;
   };
 };
 
 export type Attrs<Name extends keyof Messages> = Messages[Name]['attributes'];
 
-export type MessageNames<Sep extends string = '.'> =
+export type MessageNames<S extends string = '.'> =
   | keyof {
       readonly [Key in keyof Messages as Messages[Key]['hasValue'] extends true
         ? Key
         : never]: string;
     }
   | keyof {
-      readonly [Key in keyof Messages as `${Key}${Sep}${Extract<
+      readonly [Key in keyof Messages as `${Key}${S}${Extract<
         keyof Attrs<Key>,
         string
       >}`]: Attrs<Key>;
