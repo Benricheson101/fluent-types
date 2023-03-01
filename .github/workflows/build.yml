@@ -49,6 +49,9 @@ jobs:
       - if: contains(matrix.target, '-musl') && matrix.os == 'ubuntu-latest'
         run: 'sudo apt-get install -y musl-tools'
 
+      - name: 'Rust Build Cache'
+        uses: 'Swatinem/rust-cache@v2'
+
       - name: 'Build Binary'
         run: 'cargo build --release --target ${{matrix.target}}'
 
@@ -60,6 +63,7 @@ jobs:
 
       - name: 'Create Draft Release'
         uses: 'softprops/action-gh-release@v1'
+        if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
             ${{matrix.name}}
