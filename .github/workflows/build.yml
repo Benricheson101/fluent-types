@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: 'write'
+
 jobs:
   build:
     strategy:
@@ -52,6 +55,8 @@ jobs:
 
       - name: 'Rust Build Cache'
         uses: 'Swatinem/rust-cache@v2'
+        with:
+          cache-on-failure: true
 
       - name: 'Build Binary'
         run: 'cargo build --release --target ${{matrix.target}}'
