@@ -55,7 +55,7 @@ jobs:
       - name: 'Prepare (macos & linux)'
         if: matrix.os != 'windows-latest'
         run: |
-          tar czf ${{matrix.name}} target/${{matrix.target}}/fluent-types
+          tar czf ${{matrix.name}} target/${{matrix.target}}/release/fluent-types
           shasum -a 256 ${{matrix.name}} | cut -d ' ' -f1 > ${{matrix.name}}.sha256.txt
 
       - name: 'Create Draft Release'
