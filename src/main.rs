@@ -2,7 +2,7 @@ mod cli;
 mod codegen;
 pub mod parse;
 
-use std::{error, fs, process};
+use std::{error, fs, process, path::Path};
 
 use fluent_syntax::parser;
 
@@ -34,7 +34,16 @@ fn main() -> Result<(), Box<dyn error::Error>> {
         if out_file == "-" {
             println!("{}", ts);
         } else {
-            if let Err(err) = fs::write(out_file, ts) {
+            let path = Path::new(out_file);
+
+            if let Some(parent) = path.parent() {
+                if let Err(err) = fs::create_dir_all(parent) {
+                    eprintln!("failed to create parent dirs for output: {}", err);
+                    process::exit(1);
+                }
+            }
+
+            if let Err(err) = fs::write(path, ts) {
                 eprintln!("failed to write to output file: {}", err);
                 process::exit(1);
             }
