@@ -1,4 +1,4 @@
-load("//:defs.bzl", "fluent_types_generate")
+load(":defs.bzl", "fluent_types_generate")
 
 fluent_types_generate(
   name = "example_generate",
