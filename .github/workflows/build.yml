@@ -64,8 +64,10 @@ jobs:
       - name: 'Prepare (macos & linux)'
         if: matrix.os != 'windows-latest'
         run: |
-          tar czf ${{matrix.name}} target/${{matrix.target}}/release/fluent-types
+          pushd target/${{matrix.target}}/release
+          tar czf ../../../${{matrix.name}} fluent-types
           shasum -a 256 ${{matrix.name}} | cut -d ' ' -f1 > ${{matrix.name}}.sha256.txt
+          popd
 
       - name: 'Create Draft Release'
         uses: 'softprops/action-gh-release@v1'
