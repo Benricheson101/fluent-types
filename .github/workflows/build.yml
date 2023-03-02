@@ -66,8 +66,8 @@ jobs:
         run: |
           pushd target/${{matrix.target}}/release
           tar czf ../../../${{matrix.name}} fluent-types
-          shasum -a 256 ${{matrix.name}} | cut -d ' ' -f1 > ${{matrix.name}}.sha256.txt
           popd
+          shasum -a 256 ${{matrix.name}} | cut -d ' ' -f1 > ${{matrix.name}}.sha256.txt
 
       - name: 'Create Draft Release'
         uses: 'softprops/action-gh-release@v1'
