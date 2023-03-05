@@ -47,12 +47,10 @@ jobs:
     steps:
       - uses: 'actions/checkout@v3'
 
-      - name: 'Install Target'
-        uses: 'actions-rs/toolchain@v1'
-        with:
-          profile: 'minimal'
-          target: '${{matrix.target}}'
-          toolchain: 'stable'
+      - name: 'Install Toolchain'
+        run: |
+          rustup toolchain install stable --profile=minimal
+          rustup target add ${{matrix.target}}
 
       - if: contains(matrix.target, '-musl') && matrix.os == 'ubuntu-latest'
         run: 'sudo apt-get install -y musl-tools'
@@ -77,6 +75,7 @@ jobs:
         uses: 'softprops/action-gh-release@v1'
         if: startsWith(github.ref, 'refs/tags/')
         with:
+          draft: true
           files: |
             ${{matrix.name}}
             ${{matrix.name}}.sha256.txt
