@@ -100,7 +100,7 @@ pub fn generate_ts(parsed: &ParsedMessages) -> String {
     let code = output.code;
 
     const UTILITY_TYPES: &'static str = include_str!("../utilityTypes.ts");
-    format!("{code}\n{UTILITY_TYPES}").trim().to_string()
+    format!("/* prettier-ignore */\n// eslint-ignore\n{code}\n{UTILITY_TYPES}").trim().to_string()
 }
 
 fn build_message_member(msg: &ParsedMessage) -> TsTypeElement {
